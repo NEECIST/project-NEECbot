@@ -1,11 +1,11 @@
-#include <Servo.h>        //add Servo Motor library            
+#include <Servo.h>        //add Servo Motor library                     
 #include <NewPing.h>      //add Ultrasonic sensor library
 #include <SoftwareSerial.h>
 
-#define TxD 13
-#define RxD 12
-#define TRIG_PIN 9
-#define ECHO_PIN 6 
+#define TxD 0
+#define RxD 1
+#define TRIG_PIN 3
+#define ECHO_PIN 4
 #define MAX_DISTANCE 50 // sets maximum useable sensor measuring distance to 300cm
 
 NewPing sonar(TRIG_PIN, ECHO_PIN, MAX_DISTANCE); // sets up sensor library to use the correct pins to measure distance.
@@ -44,16 +44,17 @@ void moveBot(int x, int y){
   leftservo.write(y);
 }
 int GetDistance(){
-  digitalWrite(trigPin, LOW);
+  int duration, distance;
+  digitalWrite(TRIG_PIN, LOW);
   delayMicroseconds(2);
   
-  digitalWrite(trigPin, HIGH);
+  digitalWrite(TRIG_PIN, HIGH);
   delayMicroseconds(10);
   
-  digitalWrite(trigPin, LOW);
+  digitalWrite(TRIG_PIN, LOW);
   
   // Reads the echoPin, returns the sound wave travel time in microseconds
-  duration = pulseIn(echoPin, HIGH);
+  duration = pulseIn(ECHO_PIN, HIGH);
 
   // Calculating the distance
   distance = duration * 0.034 / 2; // Speed of sound wave divided by 2 (go and back)
@@ -141,4 +142,4 @@ void turnLeft() {
   moveBot(40,40);
   delay(150); // run motors this way for 1500     
   moveBot(90,90);
-} 
+}  

@@ -18,7 +18,7 @@ int leftDistance, rightDistance; //distances on either side
 int curDist = 0;
 int angle;
 int up;
-
+int a,b,c,p;
 //-------------------------------------------- SETUP LOOP ----------------------------------------------------------------------------
 void setup() {
   left_servo.attach(11); 
@@ -34,20 +34,23 @@ void setup() {
 
 //---------------------------------------------MAIN LOOP ------------------------------------------------------------------------------
 void loop() {
-  
- /* if(angle<130 and up==1){
-    angle=angle+10;
-  } else if (angle>50 and up==0){
-    angle=angle-10;
-  } else if (angle>=125){
-    up=0;
-  } else  if (angle<=55) {
-    up=1;
-  }*/
-  
   reader.write(angle);  // move eyes forward
+  a= readPing();
+  //b= readPing();
+  //c= readPing();
+
+  p=a;
   
-  if (readPing() < COLL_DIST) {
+  /*if(((a < c) and ( a>b))or((a > c) and ( a<b))){
+    p = a;
+  }else if(((b<c)and(b>a))or((b>c)and(b<a))){
+    p=b;
+  }else if(((c<a) and (c>b))or((c>a) and (c<b))){
+    p=c;
+  }else if( b == c){
+    p=b;
+  }*/
+  if ( p < COLL_DIST) {
     reader.write(90);
     changePath();
   }  // if forward is blocked change direction
@@ -90,7 +93,6 @@ void compareDistance()   // find the longest distance
   } else {
 
     moveBackward();
-    delay(500);
     changePath();
     
   }
@@ -100,9 +102,13 @@ void compareDistance()   // find the longest distance
 //--------------------------------------------//Reading the distance//-------------------------------------------------------------------------------------
 
 int readPing() { // read the ultrasonic sensor distance
-  delay(70);   
+  delay(50);   
   unsigned int uS = sonar.ping();
   int cm = uS/US_ROUNDTRIP_CM;
+  if(cm == 0){
+    
+    cm = MAX_DISTANCE;
+  }
   Serial.println(cm);
   return cm;
 }
@@ -110,39 +116,42 @@ int readPing() { // read the ultrasonic sensor distance
 void moveStop() { right_servo.write(90); left_servo.write(90);}  // stop the motors.
 //-------------------------------------------------------------------------------------------------------------------------------------
 void moveForward() {
-  right_servo.write(45);
-  left_servo.write(135);
+  right_servo.write(75);
+  left_servo.write(109);
 }
 //-------------------------------------------------------------------------------------------------------------------------------------
 void moveBackward() {
-    right_servo.write(135);
-    left_servo.write(45);
+    right_servo.write(105);
+    left_servo.write(71);
+    delay(1000);
 }  
 //-------------------------------------------------------------------------------------------------------------------------------------
 void turnRight() {
-  left_servo.write(135);
-  right_servo.write(135);
-  delay(150); // run motors this way for 1500        
+  left_servo.write(105);
+  right_servo.write(105);
+  delay(500); // run motors this way for 1500        
 
-   right_servo.write(0); //Set motors back to forward
-   left_servo.write(180); 
+   right_servo.write(90); //Set motors back to forward
+   left_servo.write(90); 
+   delay(200);
 }  
 //-------------------------------------------------------------------------------------------------------------------------------------
 void turnLeft() {
-  left_servo.write(45);
-  right_servo.write(45);
-  delay(150); // run motors this way for 1500     
-  right_servo.write(0); //Set motors back to forward
-  left_servo.write(180); 
+  left_servo.write(75);
+  right_servo.write(75);
+  delay(500); // run motors this way for 1500     
+  right_servo.write(90); //Set motors back to forward
+  left_servo.write(90); 
+  delay(200);
 }  
 //-------------------------------------------------------------------------------------------------------------------------------------
 void turnAround() {
-  left_servo.write(135);
-  right_servo.write(135);
-  delay(600); // run motors this way for 1700        
+  left_servo.write(110);
+  right_servo.write(110);
+  delay(1000); // run motors this way for 1700        
 
-  right_servo.write(0); //Set motors back to forward
-  left_servo.write(180); 
+  right_servo.write(90); //Set motors back to forward
+  left_servo.write(90); 
 }  
 //--------------------------------------------------------------------------------------------------------------------------------------
 //void 

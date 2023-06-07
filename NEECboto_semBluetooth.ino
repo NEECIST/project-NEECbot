@@ -1,11 +1,15 @@
 #include <Servo.h>        //add Servo Motor library            
 #include <NewPing.h>      //add Ultrasonic sensor library
+#include <MedianFilter.h>
 
 #define TRIG_PIN 3 
 #define ECHO_PIN 4
 #define MAX_DISTANCE 300 // sets maximum useable sensor measuring distance to 300cm
 #define COLL_DIST 30 // sets distance at which robot stops and reverses to 30cm
 #define TURN_DIST COLL_DIST+20 // sets distance at which robot veers away from object
+#define MEDIAN_FILTER_SIZE 5 // sets the size of the median filter to 5
+
+MedianFilter filter(MEDIAN_FILTER_SIZE); // creates a median filter object with size 5
 
 NewPing sonar(TRIG_PIN, ECHO_PIN, MAX_DISTANCE); // sets up sensor library to use the correct pins to measure distance.
 
@@ -18,7 +22,7 @@ int leftDistance, rightDistance; //distances on either side
 int curDist = 0;
 int angle;
 int up;
-int a,b,c,p;
+int p;
 //-------------------------------------------- SETUP LOOP ----------------------------------------------------------------------------
 void setup() {
   left_servo.attach(11); 
@@ -29,6 +33,7 @@ void setup() {
   delay(100); // delay for one seconds
   angle=90;
   up=1;
+  performReadings();
  }
 //------------------------------------------------------------------------------------------------------------------------------------
 
@@ -36,20 +41,8 @@ void setup() {
 void loop() {
   reader.write(angle);  // move eyes forward
   a= readPing();
-  //b= readPing();
-  //c= readPing();
-
-  p=a;
-  
-  /*if(((a < c) and ( a>b))or((a > c) and ( a<b))){
-    p = a;
-  }else if(((b<c)and(b>a))or((b>c)and(b<a))){
-    p=b;
-  }else if(((c<a) and (c>b))or((c>a) and (c<b))){
-    p=c;
-  }else if( b == c){
-    p=b;
-  }*/
+  filter.addValue(a);
+  p=filter.getMedian();
   if ( p < COLL_DIST) {
     reader.write(90);
     changePath();
@@ -65,11 +58,13 @@ void changePath() {
   moveStop();   // stop forward movement
     reader.write(36);  // check distance to the right
     delay(300);
-    rightDistance = readPing(); //set right distance
+    performReadings();
+    rightDistance = filter.getMedian(); //set right distance
     delay(300);
     reader.write(144);  // check distace to the left
     delay(500);
-    leftDistance = readPing(); //set left distance
+    performReadings();
+    leftDistance = filter.getMedian(); //set left distance
     delay(300);
     reader.write(90); //return to center
     delay(100);
@@ -96,6 +91,8 @@ void compareDistance()   // find the longest distance
     changePath();
     
   }
+  filter.dumpBuffer();
+  performReadings();
 }
 
 
@@ -155,3 +152,9 @@ void turnAround() {
 }  
 //--------------------------------------------------------------------------------------------------------------------------------------
 //void 
+void performReadings(){
+  for (int i = 0; i < MEDIAN_FILTER_SIZE; i++) {
+    filter.addValue(readPing());
+    delay(10);
+  }
+}
